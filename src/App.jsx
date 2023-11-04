@@ -26,9 +26,17 @@ function App() {
     { id: 10, img: img10 },
     { id: 11, img: img11 },
   ]);
-  const [selectThumbnails, setSelectThumbnails] = useState([]);
+  const [selectCards, setSelectCards] = useState([]);
 
- 
+  // Handle delete images
+  const handleDeleteClick = () => {
+    const updatedImages = images.filter(
+      (image) => !selectCards.some((selected) => selected.id === image.id)
+    );
+
+    setImages(updatedImages);
+    setSelectCards([]);
+  };
 
   return (
     <div className="min-h-screen w-screen flex flex-row items-center justify-center md:p-0 p-4">
@@ -37,18 +45,65 @@ function App() {
           <nav className="py-4 px-6">
             <article className="flex flex-row justify-between items-center">
               <h1 className="text-2xl font-bold">
-            
-                  Gallery
-             
+                {selectCards.length === 0 ? (
+                  "Gallery"
+                ) : (
+                  <label
+                    htmlFor="select"
+                    className="flex flex-row justify-between items-center gap-x-4"
+                  >
+                    <input
+                      type="checkbox"
+                      name="select"
+                      id="select"
+                      checked={selectCards.length > 0}
+                      className="h-5 w-5 accent-blue-500 cursor-pointer"
+                      onChange={() => setSelectCards([])}
+                    />
+                    {selectCards.length} Files Selected
+                  </label>
+                )}
               </h1>
               <button
                 className="text-red-500 font-medium"
-                
+                onClick={handleDeleteClick}
               >
                 Delete files
               </button>
             </article>
           </nav>
+          <section className="h-full w-full p-6">
+            <div className="grid lg:grid-cols-5 md:grid-cols-3 grid-cols-1 gap-6">
+              {images.map((image, index) => (
+                <div
+                  key={index}
+                  className={
+                    "group relative before:content-[''] before:absolute before:h-full before:w-full before:rounded-lg before:transition-colors before:cursor-move" +
+                    (index === 0
+                      ? " md:col-span-2 md:row-span-2"
+                      : " col-span-1") +
+                    (selectCards.find((photo) => photo.id === image.id)
+                      ? " opacity-100"
+                      : " hover:before:bg-black/50")
+                  }
+                >
+                  <img
+                    src={image.img}
+                    alt={image.id}
+                    height={index === 0 ? 390 : 184}
+                    width={index === 0 ? 390 : 184}
+                    className={
+                      "h-full w-full max-w-full rounded-lg object-contain border-2" +
+                      " " +
+                      (selectCards.find(
+                        (photo) => photo.id === image.id
+                      ) && "opacity-70")
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
         </div>
       </section>
     </div>
