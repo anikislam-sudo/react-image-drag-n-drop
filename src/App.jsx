@@ -27,7 +27,9 @@ function App() {
     { id: 11, img: img11 },
   ]);
   const [selectCards, setSelectCards] = useState([]);
-
+  const [dragging, setDragging] = useState(false);
+  const [draggedImage, setDraggedImage] = useState(null);
+  const [draggedIndex, setDraggedIndex] = useState(null);
   // Handle delete images
   const handleDeleteClick = () => {
     const updatedImages = images.filter(
@@ -37,7 +39,32 @@ function App() {
     setImages(updatedImages);
     setSelectCards([]);
   };
+  // Handle drag start
+  const handleDragStart = (image) => {
+    setDragging(true);
+    setDraggedImage(image);
+  };
 
+  // Handle drag over
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e?.target?.children[0]?.alt && setDraggedIndex(e?.target?.children[0]?.alt);
+  };
+
+  // Handle drop image
+  const handleDrop = (targetIndex) => {
+    setDragging(false);
+
+    if (draggedImage) {
+      const updatedImages = images.filter(
+        (image) => image.id !== draggedImage.id
+      );
+      updatedImages.splice(targetIndex, 0, draggedImage);
+
+      setImages(updatedImages);
+      setDraggedImage(null);
+    }
+  };
   return (
     <div className="min-h-screen w-screen flex flex-row items-center justify-center md:p-0 p-4">
       <section className="lg:w-1/2 md:w-3/4 w-full bg-white rounded-lg shadow">
@@ -73,7 +100,10 @@ function App() {
             </article>
           </nav>
           <section className="h-full w-full p-6">
-            <div className="grid lg:grid-cols-5 md:grid-cols-3 grid-cols-1 gap-6">
+            <div
+              className="grid lg:grid-cols-5 md:grid-cols-3 grid-cols-1 gap-6"
+              onDragOver={handleDragOver}
+            >
               {images.map((image, index) => (
                 <div
                   key={index}
@@ -86,18 +116,20 @@ function App() {
                       ? " opacity-100"
                       : " hover:before:bg-black/50")
                   }
+                  draggable={true}
+                  onDragStart={() => handleDragStart(image)}
+                  onDrop={() => handleDrop(index)}
                 >
                   <img
                     src={image.img}
-                    alt={image.id}
                     height={index === 0 ? 390 : 184}
                     width={index === 0 ? 390 : 184}
+
                     className={
                       "h-full w-full max-w-full rounded-lg object-contain border-2" +
                       " " +
-                      (selectCards.find(
-                        (photo) => photo.id === image.id
-                      ) && "opacity-70")
+                      (selectCards.find((photo) => photo.id === image.id) &&
+                        "opacity-70")
                     }
                   />
                 </div>
